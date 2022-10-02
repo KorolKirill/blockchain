@@ -14,8 +14,7 @@ if __name__ == '__main__':
     print(blockchain.hash(blockchain.last_block))
     blockchain.new_transaction("kirill", "alex", 0.3)
 
-    proof = blockchain.proof_of_work(blockchain.last_block['proof'])
-    blockchain.new_block(proof)
+    blockchain.new_block()
     print(blockchain.last_block)
     print(blockchain.hash(blockchain.last_block))
 

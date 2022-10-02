@@ -9,22 +9,26 @@ class Blockchain(object):
     def __init__(self):
         self.chain = []
         self.current_transactions = []
-        # dump = 'korol'.encode()
-        # prev_hash = hashlib.sha256(dump).hexdigest()
         self.new_block(previous_hash='korol', proof=19112002)
 
-    def proof_of_work(self, last_proof):
-        proof = 0
-        while self.valid_proof(last_proof, proof) is False:
-            proof += 1
-        return proof
+    def proof_of_work(self, block):
+        while self.valid_proof(block) is False:
+            block['proof'] += 1
+        return block
 
-    def valid_proof(self, last_proof, proof):
-        guess = f'{last_proof}{proof}'.encode()
-        guess_hash = hashlib.sha256(guess).hexdigest()
-        return guess_hash[:2] == "11"  # У якості підтвердження доказу - наявність в кінці хешу [місяць народження].
+    def valid_proof(self, block):
+        guess_hash = Blockchain.hash(block)
+        return guess_hash[-2:] == "11"  # У якості підтвердження доказу - наявність в кінці хешу [місяць народження].
 
-    def new_block(self, proof, previous_hash=None):
+    def get_last_proof(self):
+        if self.chain[-1] is None:
+            return 0
+        return self.chain[-1]['proof']
+
+    def new_block(self, proof=None, previous_hash=None):
+        if proof is None:
+            proof = self.get_last_proof()
+
         block = {
             'index': len(self.chain) + 1,
             'timestamp': time(),
@@ -32,6 +36,8 @@ class Blockchain(object):
             'proof': proof,
             'previous_hash': previous_hash or self.hash(self.chain[-1]),
         }
+        block = self.proof_of_work(block)
+
         self.current_transactions = []
         self.chain.append(block)
         return block
